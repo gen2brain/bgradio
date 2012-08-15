@@ -41,3 +41,5 @@ class Tray(QSystemTrayIcon):
         if event in (self.Context, self.Trigger):
             self.setContextMenu(self.menu)
             self.contextMenu().popup(QPoint(x, y))
+        elif event == self.MiddleClick:
+            self.parent.radio.action_pause.emit()

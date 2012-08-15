@@ -45,10 +45,24 @@ class BGRadio(QWidget):
             self.tray.menu.stations[QString(
                 self.stations.last[0])].setChecked(True)
 
+    def set_enabled(self, enabled=True):
+        self.tray.menu.action_pause.setEnabled(enabled)
+        self.tray.menu.action_stop.setEnabled(enabled)
+
+    def set_paused(self, paused=True):
+        if paused:
+            text = "Play"
+            icon = "media-playback-start.png"
+        else:
+            text = "Pause"
+            icon = "media-playback-pause.png"
+        self.tray.menu.action_pause.setText(text)
+        self.tray.menu.action_pause.setIcon(
+                QIcon(":icons/%s" % icon))
+
     def on_state_changed(self, state):
         if state == "stopped":
-            self.tray.menu.action_pause.setEnabled(False)
-            self.tray.menu.action_stop.setEnabled(False)
+            self.set_enabled(False)
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless-connected-25.png"))
             for action in self.tray.menu.stations.values():
@@ -60,27 +74,22 @@ class BGRadio(QWidget):
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless-connected-75.png"))
         elif state == "playing":
-            self.tray.menu.action_pause.setEnabled(True)
-            self.tray.menu.action_stop.setEnabled(True)
-            self.tray.menu.action_pause.setText("Pause")
-            self.tray.menu.action_pause.setIcon(
-                    QIcon(":icons/media-playback-pause.png"))
+            self.set_enabled(True)
+            self.set_paused(False)
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless.png"))
             if self.radio.title and self.radio.genre:
                 self.tray.setToolTip(self.radio.title)
                 self.tray.show_message(self.radio.title, self.radio.genre)
         elif state == "paused":
-            self.tray.menu.action_pause.setEnabled(True)
-            self.tray.menu.action_stop.setEnabled(True)
-            self.tray.menu.action_pause.setText("Play")
-            self.tray.menu.action_pause.setIcon(
-                    QIcon(":icons/media-playback-start.png"))
+            self.set_enabled(True)
+            self.set_paused(True)
+            if self.radio.title:
+                self.tray.setToolTip("%s - paused" % self.radio.title)
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless-connected-50.png"))
         elif state == "error":
-            self.tray.menu.action_pause.setEnabled(False)
-            self.tray.menu.action_stop.setEnabled(False)
+            self.set_enabled(False)
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless-connected-00.png"))
 
