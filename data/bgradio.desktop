@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=BGRadio
+Exec=bgradio
+Terminal=false
+Type=Application
+Icon=network-wireless
+Comment=Belgrade Radio Stations
+Categories=Audio;AudioVideo;

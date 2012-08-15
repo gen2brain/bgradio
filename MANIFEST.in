@@ -1,0 +1,3 @@
+include setup.py bgradio AUTHORS README ChangeLog COPYING
+recursive-include src/ *.py *.ui
+recursive-include data/ *.desktop
