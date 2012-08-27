@@ -16,13 +16,13 @@
 
 import sys
 
-from PyQt4.phonon import Phonon
 from PyQt4.QtCore import QThread, pyqtSignal
 
+from bgradio import vlc
 from bgradio.playlist import Playlist
 
 class Radio(QThread):
-    """Phonon Radio"""
+    """VLC Radio"""
 
     action_play = pyqtSignal(tuple)
     action_pause = pyqtSignal()
@@ -33,24 +33,27 @@ class Radio(QThread):
         self.parent = parent
         self.title = None
         self.genre = None
-        self.media = Phonon.MediaObject()
-        self.audio = Phonon.AudioOutput(Phonon.MusicCategory)
-        self.path = Phonon.createPath(self.media, self.audio)
+
+        self.vlc = vlc.Instance()
+        self.player = self.vlc.media_player_new()
 
         self.action_play.connect(self.on_play)
         self.action_pause.connect(self.on_pause)
         self.action_stop.connect(self.on_stop)
-        self.media.stateChanged.connect(self.on_state_changed)
 
-    def set_source(self, source):
-        source = Phonon.MediaSource(source)
-        if source.type() != -1:
-            self.media.setCurrentSource(source)
+        self.event = self.player.event_manager()
+        for event in [vlc.EventType.MediaPlayerOpening,
+                vlc.EventType.MediaPlayerBuffering,
+                vlc.EventType.MediaPlayerStopped,
+                vlc.EventType.MediaPlayerPlaying,
+                vlc.EventType.MediaPlayerPaused]:
+            self.event.event_attach(event, self.on_state_changed)
 
     def get_metadata(self):
         try:
-            self.title = self.media.metaData(Phonon.TitleMetaData)[0]
-            self.genre = self.media.metaData(Phonon.GenreMetaData)[0]
+            self.media.parse()
+            self.title = self.media.get_meta(vlc.Meta.Title)
+            self.genre = self.media.get_meta(vlc.Meta.Genre)
         except IndexError, err:
             sys.stderr.write("metaData IndexError: %s\n" % str(err))
 
@@ -58,35 +61,31 @@ class Radio(QThread):
         name, url = station
         playlist = Playlist(url, self).parse()
         if playlist:
-            self.set_source(playlist[0])
-            self.media.play()
+            self.media = self.vlc.media_new(playlist[0])
+            self.player.set_media(self.media)
+            self.player.play()
 
     def on_pause(self):
-        state = self.media.state()
-        if state == Phonon.PlayingState:
-            self.media.pause()
-        elif state == Phonon.PausedState:
-            self.media.play()
+        if self.player.is_playing():
+            self.player.pause()
+        else:
+            self.player.play()
 
     def on_stop(self):
-        self.media.stop()
+        self.player.stop()
 
     def run(self):
         self.exec_()
 
-    def on_state_changed(self, state, oldstate):
-        if state == Phonon.LoadingState:
+    def on_state_changed(self, event):
+        if event.type == vlc.EventType.MediaPlayerOpening:
             self.parent.state_changed.emit("loading")
-        elif state == Phonon.BufferingState:
+        elif event.type == vlc.EventType.MediaPlayerBuffering:
             self.parent.state_changed.emit("buffering")
-        elif state == Phonon.StoppedState and \
-                oldstate == Phonon.PlayingState:
+        elif event.type == vlc.EventType.MediaPlayerStopped:
             self.parent.state_changed.emit("stopped")
-        elif state == Phonon.PlayingState:
+        elif event.type == vlc.EventType.MediaPlayerPlaying:
             self.get_metadata()
             self.parent.state_changed.emit("playing")
-        elif state == Phonon.PausedState:
+        elif event.type == vlc.EventType.MediaPlayerPaused:
             self.parent.state_changed.emit("paused")
-        elif state == Phonon.ErrorState:
-            self.parent.state_changed.emit("error")
-

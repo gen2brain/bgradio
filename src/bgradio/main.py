@@ -64,15 +64,12 @@ class BGRadio(QWidget):
         if state == "stopped":
             self.set_enabled(False)
             self.tray.setIcon(QIcon(
-                ":icons/network-wireless-connected-25.png"))
+                ":icons/network-wireless-connected-00.png"))
             for action in self.tray.menu.stations.values():
                 action.setChecked(False)
         elif state == "loading":
             self.tray.setIcon(QIcon(
                 ":icons/network-wireless-connected-50.png"))
-        elif state == "buffering":
-            self.tray.setIcon(QIcon(
-                ":icons/network-wireless-connected-75.png"))
         elif state == "playing":
             self.set_enabled(True)
             self.set_paused(False)
@@ -87,12 +84,7 @@ class BGRadio(QWidget):
             if self.radio.title:
                 self.tray.setToolTip("%s - paused" % self.radio.title)
             self.tray.setIcon(QIcon(
-                ":icons/network-wireless-connected-50.png"))
-        elif state == "error":
-            self.set_enabled(False)
-            self.tray.setIcon(QIcon(
-                ":icons/network-wireless-connected-00.png"))
-
+                ":icons/network-wireless-connected-25.png"))
 
     def on_station_changed(self, station):
         name, url = station

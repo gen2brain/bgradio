@@ -35,6 +35,8 @@ class Stations():
         self.map["Naxi Radio"] = "http://naxi64.streaming.rs:9160/listen.pls"
         self.map["Novosti Radio"] = "http://www.radionovosti.rs:443/radionovosti56s.mp3.m3u"
         self.map["Radio B92"] = "http://stream.b92.net:7999/radio-b92.ogg.m3u"
+        self.map["Radio Beograd 1"] = "http://www.radiobeograd.rs/download/mp3s/radiobeograd1.asx"
+        self.map["Radio Beograd 2"] = "http://www.radiobeograd.rs/download/mp3s/radiobeograd2.asx"
         self.map["Radio Pingvin"] = "http://radiopingvin.com/live.asx"
         self.map["Radio S"] = "http://sh1.beotel.net:8002/listen.pls"
         self.map["Roadstar Radio"] = "http://roadstar128.streaming.rs:9300"

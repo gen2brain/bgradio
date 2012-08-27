@@ -17,7 +17,7 @@
 import sys
 import urllib2
 from StringIO import StringIO
-from xml.etree.ElementTree import ElementTree
+import xml.etree.ElementTree as ET
 
 class Playlist():
     """Parse playlist"""
@@ -69,10 +69,16 @@ class Playlist():
         return items
 
     def parse_asx(self):
+        def to_parseable(tree):
+            t = ET.tostring(tree)
+            t = t.lower()
+            return ET.fromstring(t)
+
         items = []
-        tree = ElementTree()
-        root = tree.parse(StringIO(self.playlist))
-        for entry in root.findall("entry"):
+        et = ET.ElementTree()
+        xml = et.parse(StringIO(self.playlist))
+        tree = to_parseable(xml)
+        for entry in tree.findall("entry"):
             ref = entry.find("ref")
             items.append(ref.attrib["href"])
         return items
